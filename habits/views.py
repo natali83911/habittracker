@@ -1,4 +1,4 @@
-from rest_framework import pagination, permissions, viewsets
+from rest_framework import pagination, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -13,8 +13,14 @@ class HabitPagination(pagination.PageNumberPagination):
 
 class HabitViewSet(viewsets.ModelViewSet):
     serializer_class = HabitSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
     pagination_class = HabitPagination
+
+    def get_permissions(self):
+        if self.action == "public":
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+        return [permission() for permission in permission_classes]
 
     def get_queryset(self):
         user = self.request.user
