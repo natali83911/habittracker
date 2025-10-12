@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -50,7 +49,7 @@ class User(AbstractUser):
         help_text="Краткое описание или цель пользования трекером",
     )
 
-    timezone = models.CharField(
+    time_zone = models.CharField(
         max_length=50, verbose_name="Часовой пояс", default="UTC"
     )
 
