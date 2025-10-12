@@ -6,6 +6,7 @@ from .models import Habit
 class HabitSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     time = serializers.TimeField(format="%H:%M")
+    owner_email = serializers.ReadOnlyField(source="user.email")
 
     class Meta:
         model = Habit
@@ -21,6 +22,7 @@ class HabitSerializer(serializers.ModelSerializer):
             "is_pleasant",
             "duration",
             "is_public",
+            "owner_email",
         ]
 
     def validate(self, data):
