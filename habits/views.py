@@ -1,14 +1,11 @@
-from rest_framework import pagination, permissions, status, viewsets
+from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import Habit
+from .paginators import HabitPagination
 from .permissions import IsOwnerOrReadOnly
 from .serializers import HabitSerializer
-
-
-class HabitPagination(pagination.PageNumberPagination):
-    page_size = 5
 
 
 class HabitViewSet(viewsets.ModelViewSet):

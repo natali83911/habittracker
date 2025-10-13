@@ -2,6 +2,8 @@ from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
+from users.models import UserTelegram
+
 User = get_user_model()
 
 
@@ -49,3 +51,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class UserTelegramSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserTelegram
+        fields = ["id", "user", "chat_id", "telegram_username"]
+        read_only_fields = ["id", "user"]

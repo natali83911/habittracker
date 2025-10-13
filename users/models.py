@@ -4,6 +4,8 @@ from django.db import models
 from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 
+from config import settings
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -68,3 +70,33 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class UserTelegram(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="telegram_profile",
+        verbose_name="Пользователь - владелец привычки",
+        help_text="Укажите пользователя",
+    )
+    chat_id = models.CharField(
+        max_length=32,
+        unique=True,
+        verbose_name="Chat_id телеграм пользователя",
+        help_text="Укажите chat_id телеграм пользователя",
+    )
+    telegram_username = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        verbose_name="Username телеграм пользователя",
+        help_text="Укажите username телеграм пользователя",
+    )
+
+    class Meta:
+        verbose_name = "Чат id телеграм"
+        verbose_name_plural = "Чаты id телеграм"
+
+    def __str__(self):
+        return f"{self.user} ({self.chat_id})"

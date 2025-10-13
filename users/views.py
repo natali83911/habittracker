@@ -1,10 +1,13 @@
 from django.contrib.auth import get_user_model
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import RegisterSerializer, UserSerializer
+from .models import UserTelegram
+from .permissions import IsOwner
+from .serializers import (RegisterSerializer, UserSerializer,
+                          UserTelegramSerializer)
 
 User = get_user_model()
 
@@ -45,3 +48,15 @@ class DeactivateUserView(APIView):
         return Response(
             {"detail": "Пользователь деактивирован"}, status=status.HTTP_204_NO_CONTENT
         )
+
+
+class UserTelegramViewSet(viewsets.ModelViewSet):
+    serializer_class = UserTelegramSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        user = self.request.user
+        return UserTelegram.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
