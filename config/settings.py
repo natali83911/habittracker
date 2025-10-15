@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from celery.schedules import crontab
@@ -121,6 +122,10 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 5,
 }
 
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
 
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
@@ -134,11 +139,12 @@ CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 CELERY_BEAT_SCHEDULE = {
-    "deactivate-inactive-users-every-midnight": {
-        "task": "lms.tasks.deactivate_inactive_users",
-        "schedule": crontab(hour=0, minute=0),  # запускать каждый день в полночь
+    'check-and-send-reminders-every-minute': {
+        'task': 'habits.tasks.check_and_send_reminders',
+        'schedule': crontab(),
     },
 }
+
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_BOT_URL = "https://api.telegram.org/bot"

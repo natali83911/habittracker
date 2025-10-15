@@ -74,6 +74,18 @@ class Habit(models.Model):
         help_text="Сделайте выбор признака публичности привычки",
     )
 
+    remind_at = models.DateTimeField(verbose_name="Время напоминания о выполнении привычки", help_text="Введите время напоминания о выполнении привычки", null=True, blank=True)
+
+    repeat = models.CharField(
+        max_length=20,
+        choices=[('none', 'Один раз'), ('daily', 'Ежедневно'), ('weekly', 'Еженедельно')],
+        default='none',
+        verbose_name="Режим повторения привычки",
+        help_text="Сделайте выбор режима повторения привычки",
+    )
+
+    last_reminded_at = models.DateTimeField(null=True, blank=True, verbose_name="Время напоминания о выполнении привычки, осуществленное в последний раз")
+
     def clean(self):
         if self.reward and self.related_habit:
             raise ValidationError(
