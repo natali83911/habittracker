@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
             "phone_number",
             "city",
             "motivation",
-            "timezone",
+            "time_zone",
             "last_active",
         ]
         read_only_fields = ["id", "last_active"]

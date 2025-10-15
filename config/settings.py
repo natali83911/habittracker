@@ -28,11 +28,14 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_celery_beat",
     "phonenumber_field",
+    "corsheaders",
+    "drf_spectacular",
     "habits",
     "users",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -120,6 +123,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 5,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
@@ -139,12 +143,31 @@ CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 CELERY_BEAT_SCHEDULE = {
-    'check-and-send-reminders-every-minute': {
-        'task': 'habits.tasks.check_and_send_reminders',
-        'schedule': crontab(),
+    "check-and-send-reminders-every-minute": {
+        "task": "habits.tasks.check_and_send_reminders",
+        "schedule": crontab(),
     },
 }
 
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_BOT_URL = "https://api.telegram.org/bot"
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+]
+
+CORS_ALLOW_ALL_ORIGINS = False
+
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "habittracker",
+    "DESCRIPTION": "Документация API для проекта работы с привычками.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": True,
+}
