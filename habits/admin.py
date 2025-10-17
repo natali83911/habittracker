@@ -17,6 +17,9 @@ class HabitAdmin(admin.ModelAdmin):
         "is_pleasant",
         "duration",
         "is_public",
+        "remind_at",
+        "repeat",
+        "last_reminded_at",
     ]
     list_filter = ["is_pleasant", "is_public", "periodicity", "user"]
     search_fields = ["action", "reward", "user__email", "place"]
@@ -34,6 +37,9 @@ class HabitAdmin(admin.ModelAdmin):
                     "is_pleasant",
                     "duration",
                     "is_public",
+                    "remind_at",
+                    "repeat",
+                    "last_reminded_at",
                 )
             },
         ),

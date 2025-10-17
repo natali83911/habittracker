@@ -5,7 +5,7 @@ from .models import Habit
 
 class HabitSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    time = serializers.TimeField(format="%H:%M")
+    # time = serializers.TimeField(format="%H:%M")
     owner_email = serializers.ReadOnlyField(source="user.email")
 
     class Meta:

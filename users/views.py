@@ -6,8 +6,7 @@ from rest_framework.views import APIView
 
 from .models import UserTelegram
 from .permissions import IsOwner
-from .serializers import (RegisterSerializer, UserSerializer,
-                          UserTelegramSerializer)
+from .serializers import RegisterSerializer, UserSerializer, UserTelegramSerializer
 
 User = get_user_model()
 
