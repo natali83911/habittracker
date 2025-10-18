@@ -23,6 +23,10 @@ from habits.models import Habit
 
 @shared_task
 def send_reminder(habit_id):
+    """
+    Отправляет напоминание по привычке в Telegram или другой канал.
+    :param habit_id: идентификатор привычки для напоминания.
+    """
     try:
         habit = Habit.objects.get(id=habit_id)
         if (
@@ -52,6 +56,15 @@ def send_reminder(habit_id):
 
 @shared_task
 def check_and_send_reminders():
+    """
+    Проверяет все привычки пользователей и отправляет напоминания, если наступило время.
+
+    Основная логика:
+    - сравнение времени remind_at с now_dt;
+    - повторные напоминания по repeat;
+    - постановка задачи в очередь через Celery.
+
+    """
     now_dt = localtime(now())
     habits = Habit.objects.exclude(remind_at__isnull=True)
     print(f"Проверка напоминаний для {habits.count()} привычки в {now_dt}")

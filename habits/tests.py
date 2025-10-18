@@ -78,7 +78,7 @@ class HabitSerializerTest(APITestCase):
         }
         factory = APIRequestFactory()
         request = factory.post("/")
-        request.user = self.user  # ключевой момент!
+        request.user = self.user
         serializer = HabitSerializer(data=data, context={"request": request})
         self.assertFalse(serializer.is_valid())
 

@@ -8,7 +8,29 @@ from config import settings
 
 
 class UserManager(BaseUserManager):
+    """
+    Кастомный менеджер пользователей.
+
+    Реализует:
+      - Создание обычного пользователя по email и паролю.
+      - Создание суперпользователя с флагами is_staff и is_superuser.
+    """
+
     def create_user(self, email, password=None, **extra_fields):
+        """
+        Создает и сохраняет обычного пользователя с указанным email и паролем.
+
+        Args:
+            email (str): Email пользователя (обязателен).
+            password (str): Пароль.
+            **extra_fields: Дополнительные поля профиля.
+
+        Returns:
+            User: созданный пользователь.
+
+        Raises:
+            ValueError: если email не указан.
+        """
         if not email:
             raise ValueError("Email обязателен")
         email = self.normalize_email(email)
@@ -18,6 +40,23 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password, **extra_fields):
+        """
+        Создает и сохраняет суперпользователя с email и паролем.
+
+        Устанавливает флаги is_staff и is_superuser (True).
+        Проверяет корректность флагов.
+
+        Args:
+            email (str): Email суперпользователя.
+            password (str): Пароль.
+            **extra_fields: Дополнительные поля.
+
+        Returns:
+            User: созданный суперпользователь.
+
+        Raises:
+            ValueError: если is_staff или is_superuser не True.
+        """
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_staff") is not True:
@@ -28,6 +67,19 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+    """
+    Модель пользователя без username, с email как идентификатором.
+
+    Поля:
+        email (EmailField): Логин и идентификатор пользователя.
+        avatar (ImageField): Аватар пользователя.
+        phone_number (PhoneNumberField): Телефон пользователя.
+        city (CharField): Город пользователя.
+        motivation (TextField): Описание мотивации или цели пользования трекером.
+        time_zone (CharField): Часовой пояс пользователя.
+        last_active (DateTimeField): Последняя активность.
+    """
+
     username = None
 
     email = models.EmailField(unique=True, verbose_name="Почта")
@@ -69,10 +121,22 @@ class User(AbstractUser):
         verbose_name_plural = "Пользователи"
 
     def __str__(self):
+        """
+        Строковое представление пользователя.
+
+        Returns:
+            str: email пользователя.
+        """
         return self.email
 
 
 class UserTelegram(models.Model):
+    """
+    Профиль Telegram для пользователя.
+
+    Содержит связь с сущностью пользователя, chat_id и username телеграмма.
+    """
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -99,4 +163,10 @@ class UserTelegram(models.Model):
         verbose_name_plural = "Чаты id телеграм"
 
     def __str__(self):
+        """
+        Строковое представление Telegram-профиля.
+
+        Returns:
+            str: Представление в виде user (chat_id).
+        """
         return f"{self.user} ({self.chat_id})"
