@@ -5,10 +5,11 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView)
 
 from .views import (DeactivateUserView, RegisterView, UserDetailView,
-                    UserViewSet)
+                    UserTelegramViewSet, UserViewSet)
 
 router = DefaultRouter()
 router.register(r"users", UserViewSet, basename="user")
+router.register(r"tg-profile", UserTelegramViewSet, basename="telegram-profile")
 
 
 app_name = "users"

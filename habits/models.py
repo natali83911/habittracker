@@ -5,6 +5,25 @@ from django.db import models
 
 
 class Habit(models.Model):
+    """
+    Модель Habit описывает привычку пользователя для системы трекинга.
+
+    Поля:
+        user (ForeignKey): Пользователь-владелец привычки.
+        action (str): Действие, которое нужно совершать.
+        time (TimeField): Время выполнения привычки.
+        place (str): Место выполнения привычки.
+        periodicity (int): Периодичность в днях (от 1 до 7).
+        reward (str): Вознаграждение за выполнение (опционально).
+        related_habit (ForeignKey): Связанная приятная привычка (если отмечена как приятная).
+        is_pleasant (bool): Является ли привычка приятной.
+        duration (int): Длительность выполнения привычки (секунды, максимум 120).
+        is_public (bool): Публичность привычки (открыта для других пользователей).
+        remind_at (DateTime): Время отправки первого напоминания.
+        repeat (str): Режим повторения (разово, ежедневно, еженедельно).
+        last_reminded_at (DateTime): Время последнего отправленного напоминания.
+    """
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -74,7 +93,40 @@ class Habit(models.Model):
         help_text="Сделайте выбор признака публичности привычки",
     )
 
+    remind_at = models.DateTimeField(
+        verbose_name="Время напоминания о выполнении привычки",
+        help_text="Введите время напоминания о выполнении привычки",
+        null=True,
+        blank=True,
+    )
+
+    repeat = models.CharField(
+        max_length=20,
+        choices=[
+            ("none", "Один раз"),
+            ("daily", "Ежедневно"),
+            ("weekly", "Еженедельно"),
+        ],
+        default="none",
+        verbose_name="Режим повторения привычки",
+        help_text="Сделайте выбор режима повторения привычки",
+    )
+
+    last_reminded_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Время напоминания о выполнении привычки, осуществленное в последний раз",
+    )
+
     def clean(self):
+        """
+        Валидирует корректность заданных параметров привычки.
+
+        - Нельзя одновременно указывать и вознаграждение, и связанную привычку.
+        - У приятной привычки не может быть ни вознаграждения, ни связанной привычки.
+        - Время выполнения не должно превышать 120 секунд.
+        - Периодичность должна быть от 1 до 7 дней.
+        """
         if self.reward and self.related_habit:
             raise ValidationError(
                 "Нельзя одновременно указывать вознаграждение и связанную привычку."
@@ -89,4 +141,9 @@ class Habit(models.Model):
             raise ValidationError("Периодичность должна быть от 1 до 7 дней.")
 
     def __str__(self):
+        """
+        Возвращает строковое представление привычки.
+
+        Формат: "{действие} в {время} в {место}"
+        """
         return f"{self.action} в {self.time} в {self.place}"
