@@ -31,7 +31,7 @@ jobs:
       - name: Lint
         run: flake8 .
       - name: Test
-        run: pytest
+        run: python manage.py test
       - name: Build Docker images
         run: docker-compose build
       - name: Deploy to server
