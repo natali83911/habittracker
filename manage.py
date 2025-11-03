@@ -1,3 +1,5 @@
+# flake8: noqa: E402
+
 import eventlet
 
 eventlet.monkey_patch()
