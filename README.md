@@ -171,7 +171,6 @@ docker compose exec web python manage.py test
 ## Лицензия
 
 MIT License
-
 ---
 
 
