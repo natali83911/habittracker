@@ -3,65 +3,100 @@
 **Многофункциональный трекер привычек с Django REST Framework, Celery, JWT и интеграцией Telegram.**
 
 ---
+## Развернутый сервер
+Доступное API приложения
+Swagger и схема: http://158.160.186.73:8000/schema/
 
-## Быстрый старт
+## Требования
+* Python 3.12+
+* Docker, Docker Compose
+* PostgreSQL, Redis (используется в контейнерах)
+* Git
+
+## Локальный запуск
 
 ### 1. Клонирование
-
 ~~~
 git clone https://github.com/natali83911/habittracker.git
 cd habittracker
 ~~~
+### 2. Создание файла переменных окружения:
 
-### 2. Подготовка окружения
-
+* Скопируйте .env.sample в .env и укажите свои значения:
 ~~~
-python -m venv .venv
-source .venv/bin/activate # Linux/Mac
-..venv\Scripts\activate # Windows
-
-pip install -r requirements.txt
+cp .env.sample .env
 ~~~
 
-### 3. Миграции и суперюзер
+* Обязательно заполните поле SECRET_KEY=.
 
+### 3. Сборка и запуск контейнеров:
 ~~~
-python manage.py migrate
-python manage.py createsuperuser
-~~~
-
-### 4. Запуск сервера
-
-~~~
-python manage.py runserver
+docker compose up -d --build
 ~~~
 
-### 5. Запуск с Gunicorn + Eventlet (для async/telegram/celery)
-
+### 4. Запуск и миграция базы данных:
 ~~~
-gunicorn -k eventlet config.wsgi:application
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py collectstatic --noinput
 ~~~
 
+### 5. Дефолтный суперюзер (если нужно):
+~~~
+docker compose exec web python manage.py createsuperuser
+~~~
 
-- В `config/wsgi.py` первой строкой:
-import eventlet; eventlet.monkey_patch()
+### 6. Доступ к API и админке:
 
+Админка: http://localhost:8000/admin/
+
+API: http://localhost:8000/habits/
 ---
-## Особенности
-- Python 3.12
-- Django 5.2
-- Django REST Framework
-- PostgreSQL
 
-## Основные приложения
+## Деплой на сервер
 
-- **users** — регистрация/логин с JWT, работа профиля, Telegram ID, права доступа.
-- **habits** — CRUD привычек, периодичность, напоминания, интеграция с celery.
-- **Celery** — фоновая отправка уведомлений (например, Telegram).
-- **JWT** — авторизация через токены.
-- **Phonenumber** — поддержка телефонов в профиле.
+### 1. Подключение к серверу:
+~~~
+ssh <USER>@<SERVER_IP>
+cd /home/<USER>/habittracker
+~~~
 
+### 2.  Получение последних изменений:
+~~~
+git pull origin main
+~~~
+
+### 3. Обновление контейнеров:
+~~~
+docker compose down
+docker compose up -d --build
+~~~
+
+### 4. Миграции и статические файлы:
+~~~
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py collectstatic --noinput
+~~~
 ---
+
+## Авторизация в API
+
+* Для большинства запросов нужен JWT-токен.
+
+* Получение токена:
+~~~
+POST /api/token/
+Content-Type: application/json
+
+{
+  "email": "<email>",
+  "password": "<password>"
+}
+~~~
+
+* Использование токена во всех запросах:
+~~~
+Authorization: Bearer <ваш_access_token>
+~~~
 
 ## API Endpoints
 
@@ -73,68 +108,69 @@ import eventlet; eventlet.monkey_patch()
 - `GET /habits/` — список привычек (требует авторизации)
 - `POST /habits/` — создать привычку
 - `DELETE /users/deactivate/` — деактивация пользователя
-
 ---
 
-## Тестирование
+## CI/CD (GitHub Actions)
+Процесс полностью автоматизирован:
 
-- Юнит‑ и интеграционные тесты:  
+* Запуск при пуше в ветки main, feature_final, develop
+* Проверка и сборка:
+  1. Линтинг (flake8)
+  2. Запуск тестов через Django manage.py test
+  3. Сборка docker-образов
 
-~~~
-python manage.py test
-~~~
+* Автоматический деплой:
+  * По SSH, с помощью секретного ключа GitHub Actions
+  * Остановка старых контейнеров и запуск новых с актуальным кодом
 
-- Покрытие
-
-~~~
-coverage run manage.py test
-coverage report -m
-coverage html
-~~~
-
-
+Необходимые Secrets в GitHub:
+* DJANGO_SECRET_KEY — секретный ключ Django
+* SERVER_HOST — IP-адрес сервера
+* SERVER_USER — имя пользователя на сервере
+* SERVER_SSH_KEY — приватный SSH-ключ для доступа
 ---
 
-## Примеры запроса
-
-### Регистрация
-
+# Инструкция по настройке сервера для CI/CD
+1. Генерация SSH-ключа для GitHub Actions:
 ~~~
-POST /users/register/
-Content-Type: application/json
-{
-"email": "user@mail.com",
-"password": "strongpass123",
-"password2": "strongpass123"
-}
+ssh-keygen -t rsa -b 4096 -C "github-actions-deploy"
 ~~~
 
-
-### Получение и обновление профиля
-
-~~~
-GET /users/user/ # JWT обязательно
-PATCH /users/user/
-{
-"city": "Москва",
-"time_zone": "Europe/Moscow"
-}
-~~~
-
-
+2. Добавьте публичный ключ в файл ~/.ssh/authorized_keys на сервере.
+3. Загрузите приватный ключ в секцию Secrets GitHub Actions как SERVER_SSH_KEY.
+4. В workflow .github/workflows/ci-cd.yml обязательно проверьте путь к проекту для шага деплоя!
 ---
 
-## Celery/Telegram
+## Дополнительно
+* Swagger-схема API: http://158.160.186.73:8000/schema/
+* Пример .env (настройка для локального теста):
+~~~
+SECRET_KEY=your_secret_key
+DEBUG=True
+POSTGRES_DB=habittracker
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=yourpassword
+...
+~~~ 
+---
 
-- Для отправки уведомлений по привычке запускаются задачи celery.
-- Telegram‑бот интегрируется через chat_id и API.
+## Тесты
+Запускаются автоматом через GitHub Actions и вручную:
+~~~
+docker compose exec web python manage.py test
+~~~
+---
 
+### Полезные команды для контейнеров
+* Стоп: docker compose down
+* Запуск: docker compose up -d --build
+* Логи: docker compose logs -f web
+* Посмотреть контейнеры: docker compose ps
 ---
 
 ## Лицензия
 
 MIT License
-
 ---
 
 

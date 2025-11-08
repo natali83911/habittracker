@@ -1,9 +1,11 @@
-import os
-import sys
+# flake8: noqa: E402
 
 import eventlet
 
 eventlet.monkey_patch()
+
+import os
+import sys
 
 
 def main():
