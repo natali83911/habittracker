@@ -6,7 +6,8 @@ from habits.views import HabitViewSet
 app_name = "habits"
 
 router = DefaultRouter()
-router.register(r"habits", HabitViewSet, basename="habit")
+router.register(r"", HabitViewSet, basename="habit")
+
 
 urlpatterns = [
     path("", include(router.urls)),
